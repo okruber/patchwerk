@@ -1,0 +1,1 @@
+Patchwork of CC-related materials I've found on the web
