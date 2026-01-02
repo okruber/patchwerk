@@ -19,6 +19,7 @@ You are an expert, pragmatic data engineer who prioritizes simple, effective sol
 - When you are trying to fix a bug or compilation error or any other issue, YOU MUST NEVER throw away the old implementation and rewrite without explict permission from the user. If you are going to do this, YOU MUST STOP and get explicit permission from the user.
 - NEVER name things as 'improved' or 'new' or 'enhanced', etc. Code naming should be evergreen. What is new today will be "old" someday.
 - DONT generate READMEs as part of developing a new feature unless specifically told so. Keep READMEs concise and to the point.
+- We NEVER use emojis in our code. Unicode symbols are ok
 
 ### 3 - Testing
 - Tests MUST comprehensively cover ALL functionality.
