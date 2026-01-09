@@ -69,3 +69,31 @@ YOU MUST follow this debugging framework for ANY technical issue:
 - NEVER claim to implement a pattern without reading it completely first
 - ALWAYS test after each change
 - IF your first fix doesn't work, STOP and re-analyze rather than adding more fixes
+
+## 4 - GCP Observability & MCP Usage
+
+### Token Management
+- YOU MUST be selective with log queries to avoid excessive token usage
+- ALWAYS start with pageSize=25 (or smaller) when exploring logs
+- YOU MUST use specific filters (severity, time windows, resource labels) to narrow results
+- ONLY increase pageSize if user explicitly needs more entries
+- When showing log results to user, YOU MUST summarize rather than dumping full logs
+- MCP responses over 5k tokens should trigger immediate investigation into query optimization
+
+### Log Query Strategy
+YOU MUST follow this approach for all observability queries:
+1. Start with most restrictive filters possible (time window, severity, resource)
+2. Use pageSize=25 for initial exploration, pageSize=10 when just checking for errors
+3. Ask user if they need more entries before fetching additional pages
+4. Summarize findings in structured format (error counts, patterns, timestamps)
+5. For error investigation, ALWAYS filter by severity="ERROR" or severity>="WARNING"
+6. Keep time windows tight (15-30 minutes) unless user specifies otherwise
+7. When investigating specific executions, ALWAYS filter by execution_name or similar identifiers
+
+### Response Formatting
+When presenting observability data:
+- Count and categorize errors before showing examples
+- Show representative log entries, not exhaustive dumps
+- Highlight actionable patterns (repeated errors, trends, anomalies)
+- Use tables or structured lists for clarity
+- Include timestamps in relative format (e.g., "5 minutes ago") when relevant
