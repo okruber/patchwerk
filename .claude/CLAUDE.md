@@ -70,25 +70,40 @@ YOU MUST follow this debugging framework for ANY technical issue:
 - ALWAYS test after each change
 - IF your first fix doesn't work, STOP and re-analyze rather than adding more fixes
 
-## 4 - GCP Observability & MCP Usage
+## 4 - GCP Observability & Tool Selection
+
+### Tool Priority for Log Queries
+**PRIMARY: gcloud CLI** - Always use gcloud for log queries (5-10x more token efficient than MCP)
+```bash
+gcloud logging read 'FILTER' \
+  --format='json(timestamp,severity,jsonPayload.message)' \
+  --limit=25
+```
+
+**SECONDARY: MCP Tools** - Only use MCP when gcloud cannot do it:
+- `list_group_stats` - Error grouping and aggregation
+- `list_time_series` - Metrics and monitoring data
+- `list_traces` / `get_trace` - Distributed tracing
+- `list_alerts` - Active alert status
 
 ### Token Management
-- YOU MUST be selective with log queries to avoid excessive token usage
-- ALWAYS start with pageSize=25 (or smaller) when exploring logs
-- YOU MUST use specific filters (severity, time windows, resource labels) to narrow results
-- ONLY increase pageSize if user explicitly needs more entries
+- ALWAYS use gcloud CLI with --format for log queries (controls exact fields returned)
+- Typical gcloud query: 500-2000 tokens vs 5000-10000 tokens with MCP
+- Default --limit=25 for exploration, --limit=10 for error checking
+- YOU MUST use specific filters (severity, time windows, resource labels)
 - When showing log results to user, YOU MUST summarize rather than dumping full logs
-- MCP responses over 5k tokens should trigger immediate investigation into query optimization
+- Any response >5k tokens should trigger immediate investigation into query optimization
 
-### Log Query Strategy
-YOU MUST follow this approach for all observability queries:
+### gcloud Log Query Strategy
+YOU MUST follow this approach for all log queries:
 1. Start with most restrictive filters possible (time window, severity, resource)
-2. Use pageSize=25 for initial exploration, pageSize=10 when just checking for errors
-3. Ask user if they need more entries before fetching additional pages
-4. Summarize findings in structured format (error counts, patterns, timestamps)
-5. For error investigation, ALWAYS filter by severity="ERROR" or severity>="WARNING"
-6. Keep time windows tight (15-30 minutes) unless user specifies otherwise
-7. When investigating specific executions, ALWAYS filter by execution_name or similar identifiers
+2. Use --limit=25 for initial exploration, --limit=10 when just checking for errors
+3. Use --format to return ONLY needed fields (timestamp, severity, message)
+4. Ask user if they need more entries before fetching additional pages
+5. Summarize findings in structured format (error counts, patterns, timestamps)
+6. For error investigation, ALWAYS filter by severity="ERROR" or severity>="WARNING"
+7. Keep time windows tight (15-30 minutes) unless user specifies otherwise
+8. When investigating specific executions, ALWAYS filter by execution_name or similar identifiers
 
 ### Response Formatting
 When presenting observability data:

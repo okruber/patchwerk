@@ -1,13 +1,13 @@
 ---
 name: observability
-description: Debug GCP services using Cloud Logging, Monitoring, and Trace with optimized queries to minimize token usage.
+description: Debug GCP services using gcloud CLI and MCP tools with optimized queries to minimize token usage.
 ---
 
 # GCP Observability Skill
 
 ## Purpose
 
-This skill provides structured workflows for investigating GCP service issues using Cloud Logging, Cloud Monitoring, and Cloud Trace while minimizing token consumption through targeted queries.
+This skill provides structured workflows for investigating GCP service issues using gcloud CLI (primary) and MCP tools (when needed) while minimizing token consumption.
 
 ## When to Use
 
@@ -18,10 +18,42 @@ Invoke this skill:
 - When user asks to "check logs" or "debug" GCP services
 - As `/observability` command
 
+## Tool Selection Strategy
+
+### PRIMARY: gcloud CLI
+Use for all log queries - much more token-efficient:
+```bash
+gcloud logging read 'FILTER' \
+  --format='json(timestamp,severity,jsonPayload.message)' \
+  --limit=25 \
+  --order=asc
+```
+
+**Why gcloud is better for logs:**
+- You control exactly which fields are returned (via --format)
+- Minimal JSON structure
+- Typical query: 500-2000 tokens vs 5000-10000 tokens with MCP
+- No additional metadata overhead
+
+**Common format patterns:**
+- Basic: `--format='json(timestamp,severity,jsonPayload.message)'`
+- With labels: `--format='json(timestamp,severity,jsonPayload.message,labels)'`
+- Text payload: `--format='json(timestamp,severity,textPayload)'`
+- Structured: `--format='json(timestamp,severity,jsonPayload)'`
+
+### SECONDARY: MCP Tools
+Reserve MCP for capabilities gcloud doesn't have:
+- `list_group_stats` - Error grouping and aggregation (no gcloud equivalent)
+- `list_time_series` - Metrics and monitoring data
+- `list_traces` / `get_trace` - Distributed tracing
+- `list_alerts` - Active alert status
+- Cross-project log aggregation
+
 ## Core Principles
 
 **Token Management**:
-- Default pageSize=25 for exploration, pageSize=10 for error checking
+- Always use gcloud CLI with --format for log queries
+- Default --limit=25 for exploration, --limit=10 for error checking
 - Always use specific filters (severity, time windows, resource labels)
 - Summarize findings instead of dumping raw logs
 - Stop and optimize if any query returns >5k tokens
@@ -31,7 +63,41 @@ Invoke this skill:
 2. Query small time windows (15-30 minutes)
 3. Filter by severity when looking for errors
 4. Use execution IDs, job names, or instance IDs when available
-5. Ask before fetching additional pages
+5. Use --format to return only needed fields
+6. Ask before fetching additional pages
+
+## gcloud Logging Filter Syntax
+
+**Basic structure:**
+```bash
+gcloud logging read 'FILTER_EXPRESSION' \
+  --limit=N \
+  --order=asc|desc \
+  --format='json(field1,field2.subfield,field3)'
+```
+
+**Common filters:**
+```bash
+# Resource type and labels
+resource.type="cloud_run_job"
+resource.labels.job_name="dbt-runner"
+labels."run.googleapis.com/execution_name"="execution-abc"
+
+# Severity
+severity="ERROR"
+severity>="WARNING"
+
+# Timestamps
+timestamp>="2026-01-09T15:26:00Z"
+timestamp>="2026-01-09T15:26:00Z" AND timestamp<"2026-01-09T15:56:00Z"
+
+# Text search
+jsonPayload.message:"database connection"
+textPayload:"failed"
+
+# Combining filters
+resource.type="cloud_run_job" AND severity>="WARNING" AND timestamp>="2026-01-09T15:26:00Z"
+```
 
 ## Common Workflows
 
@@ -41,22 +107,20 @@ Invoke this skill:
 
 **Steps**:
 1. **Get recent executions** (if not provided by user):
-   ```
+   ```bash
    gcloud run jobs executions list --job=JOB_NAME --limit=5
    ```
 
 2. **Query logs for specific execution** (15-minute window):
-   ```
-   list_log_entries(
-     resourceNames: ["projects/PROJECT_ID"],
-     filter: 'resource.type="cloud_run_job"
-             resource.labels.job_name="JOB_NAME"
-             labels."run.googleapis.com/execution_name"="EXECUTION_NAME"
-             severity>="WARNING"
-             timestamp>="EXECUTION_START_TIME"',
-     orderBy: "timestamp asc",
-     pageSize: 25
-   )
+   ```bash
+   gcloud logging read 'resource.type="cloud_run_job"
+     resource.labels.job_name="JOB_NAME"
+     labels."run.googleapis.com/execution_name"="EXECUTION_NAME"
+     severity>="WARNING"
+     timestamp>="EXECUTION_START_TIME"' \
+     --limit=25 \
+     --order=asc \
+     --format='json(timestamp,severity,jsonPayload.message,textPayload)'
    ```
 
 3. **Analyze and summarize**:
@@ -90,14 +154,14 @@ Invoke this skill:
 
 5. **Only if needed**: Fetch more context
    - Ask user: "Need full logs or trace data?"
-   - If yes, expand time window or remove severity filter
+   - If yes, expand time window or adjust --format to include more fields
 
 ### Workflow 2: Debug Recurring Errors
 
 **Goal**: Understand patterns in recurring errors
 
 **Steps**:
-1. **Query recent error group stats** (last 6 hours):
+1. **Query recent error group stats** (MCP - no gcloud equivalent):
    ```
    list_group_stats(
      projectName: "projects/PROJECT_ID",
@@ -107,16 +171,14 @@ Invoke this skill:
    )
    ```
 
-2. **For top error group, get sample logs**:
-   ```
-   list_log_entries(
-     resourceNames: ["projects/PROJECT_ID"],
-     filter: 'severity="ERROR"
-             timestamp>="-6h"
-             [specific error pattern from group stats]',
-     orderBy: "timestamp desc",
-     pageSize: 10
-   )
+2. **For top error group, get sample logs** (gcloud):
+   ```bash
+   gcloud logging read 'severity="ERROR"
+     timestamp>="2026-01-09T09:00:00Z"
+     jsonPayload.message:"CONNECTION_TIMEOUT"' \
+     --limit=10 \
+     --order=desc \
+     --format='json(timestamp,severity,jsonPayload.message,resource.labels)'
    ```
 
 3. **Analyze pattern**:
@@ -151,18 +213,18 @@ Invoke this skill:
 **Goal**: Identify why service is slow
 
 **Steps**:
-1. **Get trace samples** (last 1 hour, slow requests):
+1. **Get trace samples** (MCP - richer than gcloud):
    ```
    list_traces(
      projectId: "PROJECT_ID",
-     filter: "latency:5s",  # Requests taking >5s
+     filter: "latency:5s",
      startTime: "-1h",
      pageSize: 10,
      orderBy: "duration desc"
    )
    ```
 
-2. **Analyze slowest trace**:
+2. **Analyze slowest trace** (MCP):
    ```
    get_trace(
      projectId: "PROJECT_ID",
@@ -175,7 +237,7 @@ Invoke this skill:
    - Is it database, external API, or internal processing?
    - Are there sequential operations that could be parallel?
 
-4. **Cross-reference with metrics**:
+4. **Cross-reference with metrics** (MCP):
    ```
    list_time_series(
      name: "projects/PROJECT_ID",
@@ -215,20 +277,27 @@ Invoke this skill:
 **Goal**: Quick health overview of a service
 
 **Steps**:
-1. **Check recent errors** (last 1 hour):
-   ```
-   list_log_entries(
-     resourceNames: ["projects/PROJECT_ID"],
-     filter: 'resource.type="cloud_run_job"
-             resource.labels.job_name="JOB_NAME"
-             severity="ERROR"
-             timestamp>="-1h"',
-     output_mode: "count",
-     pageSize: 10
-   )
+1. **Check recent errors** (gcloud):
+   ```bash
+   # Count errors
+   gcloud logging read 'resource.type="cloud_run_job"
+     resource.labels.job_name="JOB_NAME"
+     severity="ERROR"
+     timestamp>="2026-01-09T14:00:00Z"' \
+     --limit=1000 \
+     --format='value(severity)' | wc -l
+
+   # Sample errors
+   gcloud logging read 'resource.type="cloud_run_job"
+     resource.labels.job_name="JOB_NAME"
+     severity="ERROR"
+     timestamp>="2026-01-09T14:00:00Z"' \
+     --limit=5 \
+     --order=desc \
+     --format='json(timestamp,jsonPayload.message)'
    ```
 
-2. **Check active alerts**:
+2. **Check active alerts** (MCP):
    ```
    list_alerts(
      parent: "projects/PROJECT_ID",
@@ -237,7 +306,7 @@ Invoke this skill:
    )
    ```
 
-3. **Check key metrics**:
+3. **Check key metrics** (MCP):
    ```
    list_time_series(
      name: "projects/PROJECT_ID",
@@ -275,35 +344,41 @@ Invoke this skill:
 
 ## Query Optimization Rules
 
-### When to Use Small pageSize (10-15):
-- Initial error checking ("are there any errors?")
-- Getting sample log entries
-- Checking for specific error patterns
+### gcloud --limit Guidelines:
+- **Start small** (10): Initial error checking, quick samples
+- **Medium** (25): General exploration, execution logs (default)
+- **Larger** (50-100): Statistical analysis, comprehensive view
+- **ONLY after asking user**: Limits >100
 
-### When to Use Medium pageSize (25):
-- General exploration
-- Getting execution logs
-- Performance analysis
-- Default for most queries
+### gcloud --format Guidelines:
+**Minimize token usage by selecting only needed fields:**
 
-### When to Use Larger pageSize (50+):
-- User explicitly requests comprehensive view
-- Building reports or dashboards
-- Need statistical significance
-- **ONLY after asking user for approval**
+```bash
+# Minimal - just messages
+--format='json(timestamp,severity,jsonPayload.message)'
+
+# Include resource info
+--format='json(timestamp,severity,jsonPayload.message,resource.labels.job_name)'
+
+# Full payload when needed
+--format='json(timestamp,severity,jsonPayload)'
+
+# Text logs
+--format='json(timestamp,severity,textPayload)'
+```
 
 ### Time Window Guidelines:
 - **Start narrow** (15-30 minutes for specific executions)
 - **Expand cautiously** (to 1-6 hours for pattern analysis)
 - **Daily/weekly** only for trends or statistics
-- **Always** use ISO 8601 format for timestamps
+- **Always** use ISO 8601 format: `timestamp>="2026-01-09T15:26:00Z"`
 
 ### Filter Specificity:
 Always include at minimum:
-1. Resource type (e.g., `resource.type="cloud_run_job"`)
-2. Time window (`timestamp>="..."` or use interval)
-3. Severity (when debugging errors: `severity>="WARNING"`)
-4. Resource identifier when available (job_name, instance_id, etc.)
+1. Resource type: `resource.type="cloud_run_job"`
+2. Time window: `timestamp>="..."`
+3. Severity (when debugging): `severity>="WARNING"`
+4. Resource identifier: `resource.labels.job_name="..."`
 
 ## Response Formatting
 
@@ -353,7 +428,7 @@ User: "dbt-runner job failed, can you check what happened?"
 Assistant: "Let me check the logs for the most recent execution."
 
 [Gets execution list, identifies failed execution]
-[Queries logs with targeted filter, pageSize=25]
+[Uses gcloud logging read with targeted filter, --limit=25]
 
 "Found the issue:
 
@@ -372,12 +447,11 @@ Execution dbt-runner-xyz failed at 14:32:15.
 ### Example 2: Performance Issue
 ```
 User: "API responses are slow, can you investigate?"
-
 Assistant: "I will analyze recent traces and metrics."
 
-[Uses list_traces with latency filter, pageSize=10]
-[Gets detailed trace for slowest request]
-[Checks time_series metrics for P95 latency]
+[Uses MCP list_traces with latency filter, pageSize=10]
+[Gets detailed trace for slowest request via MCP get_trace]
+[Uses gcloud to check for related errors in logs]
 
 "Performance Analysis:
 
@@ -398,8 +472,8 @@ User: "We are seeing random errors - what's the pattern?"
 
 Assistant: "Let me check error groupings."
 
-[Uses list_group_stats for last 6 hours]
-[Samples top error group with list_log_entries, pageSize=10]
+[Uses MCP list_group_stats for last 6 hours]
+[Uses gcloud to sample top error group, --limit=10]
 
 "Error Pattern Analysis:
 
@@ -421,4 +495,4 @@ Assistant: "Let me check error groupings."
 
 ---
 
-Remember: The goal is actionable insights with minimal token usage. Always start narrow and expand only when needed.
+Remember: The goal is actionable insights with minimal token usage. Always prefer gcloud CLI for logs, use MCP only when gcloud cannot do it.
