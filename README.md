@@ -1,4 +1,4 @@
-# 🧪 Patchwerk 🧪
+<h1 align="center">🧪 Patchwerk 🧪</h1>
 
 <p align="center">
   <img src="assets/patchwerk.png" alt="Patchwerk" width="200"/>
