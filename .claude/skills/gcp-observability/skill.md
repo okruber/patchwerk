@@ -1,5 +1,5 @@
 ---
-name: observability
+name: gcp-observability
 description: Debug GCP services using gcloud CLI and MCP tools with optimized queries to minimize token usage.
 ---
 
@@ -16,7 +16,7 @@ Invoke this skill:
 - When analyzing performance issues or latency problems
 - When debugging failed executions or deployments
 - When user asks to "check logs" or "debug" GCP services
-- As `/observability` command
+- As `/gcp-observability` command
 
 ## Tool Selection Strategy
 

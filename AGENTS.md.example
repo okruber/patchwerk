@@ -1,0 +1,136 @@
+<!-- ROUTING FILE: Load skills as directed. Read before writing code. -->
+
+# Agent Configuration Template
+
+Copy this to your project's AGENTS.md and customize the marked sections.
+
+---
+
+## Project Overview
+
+**Purpose**: [Describe what this project does, who uses it, what problem it solves]
+
+**Tech Stack**:
+- Language: [Python, TypeScript, etc.]
+- Package Management: [uv, npm, cargo, etc.]
+- Testing: [pytest, jest, cargo test, etc.]
+- Infrastructure: [GCP, AWS, Azure, on-prem, etc.]
+- VCS: [Git workflow preferences]
+
+**Architecture**: [Brief description - microservices, monolith, skills-based routing, etc.]
+
+---
+
+## CRITICAL: Before Writing Any Code
+
+**CRITICAL: [Package management rule, e.g., "Prefer `uv` for package management"]**
+
+**CRITICAL: NEVER push code to remote (git push) unless the user explicitly requests it.**
+
+**CRITICAL: [Add other project-specific critical warnings]**
+<!-- Examples:
+- NEVER run terraform apply/destroy unless explicitly asked
+- NEVER modify production database directly
+- NEVER run docker compose down -v (destroys volumes)
+-->
+
+**Load these skills FIRST:**
+
+- **[Context]** → `[skill-name]` ([what it provides])
+
+<!-- Examples:
+- **Python code** → `dignified-python` skill (LBYL, modern types, ABC interfaces)
+- **Test code** → `fake-driven-testing` skill (5-layer architecture, test placement)
+- **Debugging** → `debugging-framework` skill (4-phase systematic approach)
+- **GCP operations** → `gcp-observability` skill (token-efficient workflows)
+-->
+
+---
+
+## Core Principles
+
+- **Greenfield by default**: Get explicit approval before implementing backward compatibility
+- **YAGNI/DRY/SOLID**: Best code is no code - only build what's needed now
+- **Progressive disclosure**: Load skills for detailed guidance
+- **Simplicity over cleverness**: Readability and maintainability are primary concerns
+- **Ask, don't assume**: Clarify requirements rather than guessing
+- **Never discard on failure**: Modify existing code instead of rewriting
+
+**For detailed [domain] standards** → load `[skill-name]` skill
+
+<!-- Examples:
+**For Python-specific standards** → load `dignified-python` skill
+**For testing guidance** → load `fake-driven-testing` skill
+-->
+
+---
+
+## Tool Routing
+
+### [Tool Category] → Use `[agent-name]` agent
+
+Commands: [command1, command2, etc.]
+
+**FORBIDDEN prompts:**
+- [Prompts that misuse the agent]
+
+**REQUIRED pattern:**
+- [Correct usage patterns]
+
+<!-- Example:
+### Development Commands → Use `devrun` agent
+
+Commands: pytest, ty, ruff, prettier, make
+
+**FORBIDDEN prompts:**
+- "fix any errors that arise"
+- "make the tests pass"
+
+**REQUIRED pattern:**
+- "Run [command] and report results"
+
+devrun is READ-ONLY. It runs commands and reports. Parent agent handles all fixes.
+-->
+
+---
+
+## Skill Loading Behavior
+
+Skills persist for the entire session. Once loaded, they remain in context.
+
+- DO NOT reload skills already loaded in this session
+- Hook reminders fire as safety nets, not commands
+- Check if loaded: Look for `<command-message>The "{name}" skill is loading</command-message>` earlier in conversation
+
+---
+
+## Quick Reference
+
+**Naming**:
+- Claude artifacts (`.claude/`): `kebab-case` (NOT underscores)
+- Never name things 'improved', 'new', 'enhanced' - code naming should be evergreen
+- [Add language-specific conventions if non-standard]
+
+**Package management**: [tool preference]
+
+**Version control**: [workflow rules]
+
+<!-- Add high-frequency patterns you type repeatedly -->
+
+---
+
+## Project Constraints
+
+**No time estimates in plans:**
+- FORBIDDEN: Time estimates (hours, days, weeks)
+- FORBIDDEN: Velocity predictions or completion dates
+
+**Test discipline:**
+- FORBIDDEN: Writing tests for speculative features
+- ALLOWED: TDD workflow (write test → implement → refactor)
+- MUST: Only test actively implemented code
+
+<!-- Add project-specific constraints:
+- **Documentation**: NEVER update CHANGELOG.md (handled by release process)
+- **Dependencies**: NEVER upgrade major versions without approval
+-->
