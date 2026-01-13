@@ -21,10 +21,13 @@
 
 **CRITICAL: Prefer `uv` for package management. If the project uses `pip` conventionally, follow that convention.**
 
+**For detailed uv workflows** → load `uv-management` skill
+
 **CRITICAL: NEVER push code to remote (git push) unless the user explicitly requests it.**
 
 **Load these skills FIRST:**
 
+- **Package management with uv** → `uv-management` skill (workflows, CI/CD, troubleshooting)
 - **Python code** → `dignified-python` skill (LBYL, modern types, ABC interfaces)
 - **Test code** → `fake-driven-testing` skill (5-layer architecture, test placement)
 - **Debugging** → `debugging-framework` skill (4-phase systematic approach)
@@ -87,7 +90,7 @@ Skills persist for the entire session. Once loaded, they remain in context.
 - Never name things 'improved', 'new', 'enhanced' - code naming should be evergreen
 - File headers: All Python files start with 2-line ABOUTME comment (greppable)
 
-**Package management**: `uv` preferred over `pip`
+**Package management**: `uv` preferred over `pip` (load `uv-management` for workflows)
 
 **Version control**: Never push unless asked
 
