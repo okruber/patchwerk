@@ -5,15 +5,23 @@ description: Terraform infrastructure-as-code standards with project-specific co
 
 # Terraform Infrastructure Standards
 
-## CRITICAL: Load Project Context First
+## CRITICAL: Required Reading Before Any Terraform Work
 
-**Before writing ANY Terraform code**, you MUST check for and load project-specific configuration:
+**Before writing, reviewing, or refactoring ANY Terraform code**, you MUST read these files in order:
+
+### 1. Terraform Best Practices (REQUIRED)
+
+@references/terraform-practices.md
+
+### 2. Project-Specific Context (if exists)
+
+Check for and load project-specific configuration:
 
 ```
 .claude/docs/project/terraform.md
 ```
 
-This file contains project-specific Terraform implementation details including:
+This file contains project-specific implementation details including:
 - Provider configurations and required versions
 - Backend state configuration
 - Project-specific naming conventions
@@ -21,15 +29,11 @@ This file contains project-specific Terraform implementation details including:
 - Custom module locations
 - CI/CD pipeline integration details
 
-**If this file exists, read it completely before proceeding.** Project-specific instructions override general guidance below.
-
-**If the file does not exist**, proceed with general best practices and consider creating it for the project.
+**If this file exists, read it completely.** Project-specific instructions override general guidance.
 
 ---
 
 ## General Terraform Standards
-
-@references/terraform-practices.md
 
 ## Module Structure Example
 
@@ -41,14 +45,22 @@ terraform/
 │   │   ├── variables.tf
 │   │   ├── outputs.tf           # Only if outputs will be consumed
 │   │   └── versions.tf          # Provider version constraints
-│   ├── cloud-run-function/
-│   │   ├── function.tf
+│   ├── cloud-run-job/
+│   │   ├── job.tf               # Terraform resources
 │   │   ├── iam.tf
 │   │   ├── variables.tf
 │   │   ├── versions.tf
-│   │   └── src/                  # Source code for the function
-│   │       ├── main.py
-│   │       └── requirements.txt
+│   │   ├── Dockerfile           # Container build (flat, not nested)
+│   │   ├── pyproject.toml       # Dependencies
+│   │   ├── src/                  # Python source code
+│   │   │   └── main.py
+│   │   └── tests/                # Tests
+│   ├── airflow-pipeline/
+│   │   ├── composer.tf          # Terraform resources
+│   │   ├── variables.tf
+│   │   ├── dags/                 # Airflow DAGs (conventional name)
+│   │   │   └── my_dag.py
+│   │   └── requirements.txt
 │   └── datalake/
 │       ├── storage.tf
 │       ├── bigquery.tf
@@ -59,23 +71,38 @@ terraform/
 │   │   │   └── main.tf          # Calls ../../modules/datalake
 │   │   ├── database/
 │   │   │   └── main.tf
-│   │   └── cloud-run-function/
-│   │       └── main.tf
-│   ├── test/
-│   │   ├── datalake/
-│   │   │   └── main.tf
-│   │   └── database/
-│   │       └── main.tf
+│   │   └── cloud-run-job/
+│   │       ├── main.tf
+│   │       └── config/          # Environment-specific configs
+│   │           └── config.yaml
 │   └── prod/
 │       ├── datalake/
 │       │   └── main.tf
 │       ├── database/
 │       │   └── main.tf
-│       └── cloud-run-function/
-│           └── main.tf
+│       └── cloud-run-job/
+│           ├── main.tf
+│           └── config/          # Prod-specific configs
+│               └── config.yaml
 ├── Makefile                      # Quality gates (fmt, checkov, docs)
 └── README.md
 ```
+
+### Module Organization
+
+**Keep source code WITH the module, but organized:**
+
+| File Type | Location | Notes |
+|-----------|----------|-------|
+| Terraform (*.tf) | Module root | Infrastructure definitions |
+| Dockerfile, pyproject.toml | Module root | Build/dependency files (flat) |
+| Python source | `src/` | Conventional Python package location |
+| Tests | `tests/` | Conventional test location |
+| Airflow DAGs | `dags/` | Conventional Airflow location |
+| dbt models | `models/` | Conventional dbt location |
+| Environment configs | `environments/<env>/<svc>/config/` | NOT in modules |
+
+**Key principle:** Use conventional folder names (`src/`, `dags/`, `models/`) for code, keep build files flat at module root.
 
 ## Quick Reference
 
@@ -85,5 +112,6 @@ terraform/
 | **Variables** | Only parameterize what varies | Make everything a variable |
 | **Outputs** | Only when consumed downstream | Create empty `outputs.tf` |
 | **Module depth** | Max 2 levels | Deeply nested modules |
-| **Source code** | Under module: `modules/X/src/` | Scattered in separate repos |
+| **Source code** | Flat in module with `src/`, `dags/` | Nested wrapper folders |
+| **Env configs** | `environments/<env>/<svc>/config/` | Hardcoded in modules |
 | **Versioning** | Pessimistic: `~> 5.0` | Exact pins or floating |
