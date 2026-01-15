@@ -57,7 +57,7 @@ fi
 
 # Check for existing files and warn
 WILL_OVERWRITE=false
-for file in .claude AGENTS.md AGENTS.md.example .gitignore; do
+for file in .claude AGENTS.md AGENTS.md.example; do
     if [ -e "$TARGET_DIR/$file" ]; then
         warn "Will overwrite: $file"
         WILL_OVERWRITE=true
@@ -99,23 +99,6 @@ if [ -f "$SCRIPT_DIR/AGENTS.md.example" ]; then
     success "Copied AGENTS.md.example"
 else
     warn "AGENTS.md.example not found - skipping"
-fi
-
-# Copy .gitignore (merge if exists)
-if [ -f "$SCRIPT_DIR/.gitignore" ]; then
-    if [ -f "$TARGET_DIR/.gitignore" ]; then
-        # Backup existing
-        cp "$TARGET_DIR/.gitignore" "$TARGET_DIR/.gitignore.backup"
-        # Merge (remove duplicates)
-        cat "$TARGET_DIR/.gitignore" "$SCRIPT_DIR/.gitignore" | sort -u > "$TARGET_DIR/.gitignore.tmp"
-        mv "$TARGET_DIR/.gitignore.tmp" "$TARGET_DIR/.gitignore"
-        success "Merged .gitignore (backup saved as .gitignore.backup)"
-    else
-        cp "$SCRIPT_DIR/.gitignore" "$TARGET_DIR/.gitignore"
-        success "Copied .gitignore"
-    fi
-else
-    warn ".gitignore not found - skipping"
 fi
 
 info ""
