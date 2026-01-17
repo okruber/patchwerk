@@ -88,7 +88,6 @@ Skills persist for the entire session. Once loaded, they remain in context.
 **Naming**:
 - Agent artifacts (`.claude/`, `.gemini/`): `kebab-case` (NOT underscores)
 - Never name things 'improved', 'new', 'enhanced' - code naming should be evergreen
-- File headers: All Python files start with 2-line ABOUTME comment (greppable)
 
 **Package management**: `uv` preferred over `pip` (load `uv-management` for workflows)
 
