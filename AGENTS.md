@@ -4,7 +4,7 @@
 
 ## Project Overview
 
-**Purpose**: Demonstration of Claude Code best practices using skill-based routing architecture. Collection of reusable configuration patterns for multi-project management.
+**Purpose**: Demonstration of agentic coding best practices using skill-based routing architecture. Collection of reusable configuration patterns for multi-project management.
 
 **Tech Stack**:
 - Language: Python
@@ -86,7 +86,7 @@ Skills persist for the entire session. Once loaded, they remain in context.
 ## Quick Reference
 
 **Naming**:
-- Claude artifacts (`.claude/`): `kebab-case` (NOT underscores)
+- Agent artifacts (`.claude/`, `.gemini/`): `kebab-case` (NOT underscores)
 - Never name things 'improved', 'new', 'enhanced' - code naming should be evergreen
 - File headers: All Python files start with 2-line ABOUTME comment (greppable)
 
