@@ -1,6 +1,7 @@
 ---
 name: commit-messages
-description: Write commit messages following conventional commits standard. Use when creating commits or reviewing commit messages.
+description: Write git commit messages following conventional commits standard. Use when creating git commits via Bash tool (git commit) or reviewing commit messages.
+model: haiku
 ---
 
 # Conventional Commits Standard
