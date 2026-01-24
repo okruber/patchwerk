@@ -32,7 +32,7 @@ service-account*.json
 .claude/CLAUDE.local.md
 *.local.md
 AGENTS.md.example
-.beads/
+.beads
 
 # Logs
 *.log
