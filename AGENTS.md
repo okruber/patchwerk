@@ -43,6 +43,7 @@
 - **Simplicity over cleverness**: Readability and maintainability are primary concerns
 - **Ask, don't assume**: Clarify requirements rather than guessing
 - **Never discard on failure**: When fixing bugs/errors, modify existing code instead of rewriting
+- **Version compatibility first**: When adding dependencies or encountering deployment issues, research version constraints thoroughly. Check changelogs, compatibility matrices, and known issues before changing versions.
 
 **For detailed Python standards** → load `dignified-python` skill
 
