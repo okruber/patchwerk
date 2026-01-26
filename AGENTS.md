@@ -43,7 +43,7 @@
 - **Simplicity over cleverness**: Readability and maintainability are primary concerns
 - **Ask, don't assume**: Clarify requirements rather than guessing
 - **Never discard on failure**: When fixing bugs/errors, modify existing code instead of rewriting
-- **Version compatibility first**: When adding dependencies or encountering deployment issues, research version constraints thoroughly. Check changelogs, compatibility matrices, and known issues before changing versions.
+- **Version compatibility first**: When introducing new libraries/packages, **always use Context7** (`resolve-library-id` → `query-docs`) to fetch current documentation. Research version constraints, changelogs, and compatibility matrices before changing versions.
 
 **For detailed Python standards** → load `dignified-python` skill
 
@@ -56,6 +56,20 @@
 ---
 
 ## Tool Routing
+
+### External Libraries → Use Context7 MCP
+
+**ALWAYS** use Context7 when:
+- Adding a new dependency to the project
+- Working with a library's API for the first time in a session
+- Debugging import errors, missing methods, or version conflicts
+- Uncertain about current API signatures or patterns
+
+**Workflow:**
+1. `resolve-library-id` - convert library name to Context7 ID
+2. `query-docs` - fetch current documentation with the resolved ID
+
+Never rely on training data for external library APIs.
 
 ### Development Commands → Use `devrun` agent
 
