@@ -28,6 +28,7 @@
 **Load these skills FIRST:**
 
 - **Package management with uv** → `uv-management` skill (workflows, CI/CD, troubleshooting)
+- **Dockerfiles with Python/uv** → `uv-docker` skill (multistage builds, production patterns)
 - **Python code** → `dignified-python` skill (LBYL, modern types, ABC interfaces)
 - **Test code** → `fake-driven-testing` skill (5-layer architecture, test placement)
 - **Debugging** → `debugging-framework` skill (4-phase systematic approach)

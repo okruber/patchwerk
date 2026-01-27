@@ -1,8 +1,7 @@
 ---
 name: uv-management
 description: Use when working with Python package management, dependencies, uv tooling, or you're about to run pip.
-  Covers installation, workflows, CI/CD, troubleshooting, and best practices for uv. Essential for project setup,
-  dependency management, virtual environments, and CI/CD configuration.
+  Covers installation, workflows, CI/CD, troubleshooting, and best practices for uv.
 ---
 
 # UV Management
@@ -17,6 +16,8 @@ Load this skill when:
 - Migrating from pip/poetry/pipenv/conda to uv
 - Working with monorepos or workspace configurations
 - Configuring build systems or private package repositories
+
+For Dockerfiles with uv, load the `uv-docker` skill instead.
 
 ---
 
@@ -119,20 +120,6 @@ jobs:
       - run: uv run pytest -q
 ```
 
-### 3.2 Docker
-
-```dockerfile
-FROM ghcr.io/astral-sh/uv:0.7.4 AS uv
-FROM python:3.12-slim
-
-COPY --from=uv /usr/local/bin/uv /usr/local/bin/uv
-COPY pyproject.toml uv.lock /app/
-WORKDIR /app
-RUN uv sync --production --locked
-COPY . /app
-CMD ["uv", "run", "python", "-m", "myapp"]
-```
-
 ---
 
 ## 4 — Migration Matrix
@@ -160,46 +147,9 @@ CMD ["uv", "run", "python", "-m", "myapp"]
 
 ---
 
-## 6 — Exec Pitch (30 s)
+## 6 — Additional Topics
 
-```text
-• 10–100× faster dependency & env management in one binary.
-• Universal lockfile ⇒ identical builds on macOS / Linux / Windows / ARM / x86.
-• Backed by the Ruff team; shipping new releases ~monthly.
-```
-
----
-
-## 7 — Agent Cheat‑Sheet (Copy/Paste)
-
-```bash
-# new project
-a=$PWD && uv init myproj && cd myproj && uv add requests rich
-
-# test run
-uv run python -m myproj ...
-
-# lock + CI restore
-uv lock && uv sync --locked
-
-# adhoc script
-uv add --script tool.py httpx
-uv run tool.py
-
-# manage CLI tools
-uvx ruff check .
-uv tool install pre-commit
-
-# Python versions
-uv python install 3.12
-uv python pin 3.12
-```
-
----
-
-## 8 — Additional Topics
-
-### 8.1 Lock File Workflows
+### 6.1 Lock File Workflows
 
 **When to use lock file flags:**
 
@@ -222,7 +172,7 @@ uv lock                                 # regenerate lock file
 git add uv.lock pyproject.toml
 ```
 
-### 8.2 Workspace Configuration (Monorepos)
+### 6.2 Workspace Configuration (Monorepos)
 
 **Setup workspace in pyproject.toml:**
 
@@ -255,7 +205,7 @@ uv add --package pkg-a requests # add dep to specific member
 uv run --package web python -m web  # run command in member context
 ```
 
-### 8.3 pyproject.toml Patterns
+### 6.3 pyproject.toml Patterns
 
 **Minimal pyproject.toml:**
 
@@ -315,7 +265,7 @@ uv sync --no-dev                # production install only
 uv sync --extra docs            # install with optional 'docs' group
 ```
 
-### 8.4 Private Package Repositories
+### 6.4 Private Package Repositories
 
 **Using private indexes:**
 
@@ -359,7 +309,7 @@ dependencies = [
 ]
 ```
 
-### 8.5 Editable Installs
+### 6.5 Editable Installs
 
 **Local development:**
 
@@ -388,7 +338,7 @@ dependencies = [
 ]
 ```
 
-### 8.6 Pre-commit Integration
+### 6.6 Pre-commit Integration
 
 **Basic .pre-commit-config.yaml:**
 
@@ -418,7 +368,7 @@ pre-commit install
 pre-commit run --all-files  # test all hooks
 ```
 
-### 8.7 Virtual Environment Activation
+### 6.7 Virtual Environment Activation
 
 **uv run vs activated venv:**
 
@@ -441,7 +391,7 @@ deactivate                     # exit venv
 - `uv run` - Always uses correct venv, works in any directory, adds slight overhead
 - Activated venv - Faster (no wrapper), better for REPL/debugging, must activate first
 
-### 8.8 Build Isolation
+### 6.8 Build Isolation
 
 **When to disable build isolation:**
 
@@ -467,44 +417,3 @@ uv pip install psycopg2-binary
 ```
 
 **Note:** Disabling build isolation means packages can see your entire environment. Only use when necessary and prefer binary wheels when available.
-
----
-
-## Quick Reference Commands
-
-```bash
-# Project lifecycle
-uv init                         # create new project
-uv add <package>               # add dependency
-uv remove <package>            # remove dependency
-uv sync                        # install all dependencies
-uv lock                        # update lock file
-uv run <cmd>                   # run command in venv
-
-# Environment management
-uv venv                        # create virtual environment
-uv python list                 # list available Python versions
-uv python install 3.12         # install Python version
-uv python pin 3.12            # set project Python version
-
-# CLI tools
-uvx <tool>                    # run tool ephemerally
-uv tool install <tool>        # install tool globally
-uv tool list                  # list installed tools
-uv tool uninstall <tool>      # remove installed tool
-
-# Dependency inspection
-uv pip list                   # list installed packages
-uv pip show <package>         # show package details
-uv pip tree                   # show dependency tree (if available)
-
-# Cache management
-uv cache clean                # clear all caches
-uv cache dir                  # show cache directory
-uv cache info                 # show cache statistics
-
-# Troubleshooting
-uv --version                  # check uv version
-RUST_LOG=debug uv <cmd>      # debug logging
-uv cache clean && rm -rf .venv && uv sync  # nuclear option
-```
