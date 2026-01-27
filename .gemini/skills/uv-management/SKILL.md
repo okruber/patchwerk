@@ -1,8 +1,7 @@
 ---
 name: uv-management
-description: Use when working with Python package management, dependencies, or uv tooling.
-  Covers installation, workflows, CI/CD, troubleshooting, and best practices for uv
-  (the fast Python package installer and resolver). Essential for project setup,
+description: Use when working with Python package management, dependencies, uv tooling, or you're about to run pip.
+  Covers installation, workflows, CI/CD, troubleshooting, and best practices for uv. Essential for project setup,
   dependency management, virtual environments, and CI/CD configuration.
 ---
 
