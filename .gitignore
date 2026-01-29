@@ -101,3 +101,6 @@ pyrightconfig.json
 
 # Distribution
 *.whl
+
+# bv (beads viewer) local config and caches
+.bv/

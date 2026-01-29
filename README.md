@@ -4,48 +4,25 @@
   <img src="assets/patchwerk.png" alt="Patchwerk" width="200"/>
 </p>
 
-This repository is a patchwork of configuration files, scripts, and utilities stitched together from various sources across the internet.
+Reusable agent configuration patterns for AI coding assistants.
 
-## Agent Configuration System
+## Architecture
 
-A layered, modular agent configuration system for Claude Code that separates concerns and makes the workflow stack-agnostic.
-
-### Structure
+**Multi-framework support** via symlinks: `.claude/` and `.gemini/` both point to centralized config.
 
 ```
-.claude/
-├── CLAUDE.md              → @../AGENTS.md (pointer only)
-└── skills/
-    ├── dignified-python/  → Python standards (LBYL, types, ABC)
-    ├── fake-driven-testing/ → 5-layer test architecture
-    └── agents/
-        └── devrun.md      → Read-only test runner
-
-AGENTS.md                  → Central configuration (root level)
+AGENTS.md (root)           → Project config + skill routing
+  ├→ .agent-skills/        → Domain expertise (Python, testing, GCP, etc.)
+  └→ .agent-defs/          → Task agents (devrun for pytest/ruff/etc.)
 ```
 
-### How It Works
+**Entry**: `.claude/CLAUDE.md` → `@../AGENTS.md`
 
-1. **Entry Point**: Claude Code loads `.claude/CLAUDE.md`, which contains only `@../AGENTS.md`
-2. **Central Config**: `AGENTS.md` contains project-specific guidance and routes to skills
-3. **Skills**: Domain knowledge loaded on-demand (Python standards, testing patterns)
-4. **Agents**: Task executors like `devrun` (read-only, runs pytest/ruff/etc)
+**Skills load on-demand**: Python standards, testing architecture, debugging, GCP ops, Terraform, uv/Docker patterns.
 
-### Flow
+## Key Features
 
-```
-CLAUDE.md (pointer)
-    ↓
-AGENTS.md (rules + skill routing)
-    ↓
-    ├→ dignified-python skill
-    ├→ fake-driven-testing skill
-    └→ devrun agents (read-only)
-```
-
-### Benefits
-
-- **Stack-Agnostic**: `.claude/` folder reusable across projects
-- **Separation of Concerns**: General guidance vs domain expertise vs tooling
-- **On-Demand Loading**: Skills only loaded when relevant
-- **Read-Only Safety**: Agents can't accidentally modify files
+- Single-source-of-truth via symlinks
+- Stack-agnostic reusability
+- Read-only safety for test runners
+- Progressive disclosure (skills loaded when relevant)
