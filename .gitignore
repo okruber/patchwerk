@@ -104,3 +104,9 @@ pyrightconfig.json
 
 # bv (beads viewer) local config and caches
 .bv/
+
+# Ignore junction/symlink contents (Windows workaround)
+.claude/agents/
+.claude/skills/
+.gemini/agents/
+.gemini/skills/
