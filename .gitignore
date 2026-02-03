@@ -33,6 +33,7 @@ service-account*.json
 *.local.md
 AGENTS.md.example
 .beads
+setup.md
 
 # Logs
 *.log
