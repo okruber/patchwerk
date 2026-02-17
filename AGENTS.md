@@ -33,6 +33,7 @@
 - **Test code** → `fake-driven-testing` skill (5-layer architecture, test placement)
 - **Debugging** → `debugging-framework` skill (4-phase systematic approach)
 - **GCP operations** → `gcp-observability` skill (token-efficient workflows using gcloud CLI)
+- **Swarm orchestration** → `swarm` skill (parallel agent work, merge protocol, worker lifecycle)
 
 ---
 
