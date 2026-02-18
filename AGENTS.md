@@ -27,6 +27,7 @@
 
 **Load these skills FIRST:**
 
+- **Non-trivial tasks** → `brainstorming` skill (context discovery, scope assessment, approach selection)
 - **Package management with uv** → `uv-management` skill (workflows, CI/CD, troubleshooting)
 - **Dockerfiles with Python/uv** → `uv-docker` skill (multistage builds, production patterns)
 - **Python code** → `dignified-python` skill (LBYL, modern types, ABC interfaces)
@@ -34,6 +35,28 @@
 - **Debugging** → `debugging-framework` skill (4-phase systematic approach)
 - **GCP operations** → `gcp-observability` skill (token-efficient workflows using gcloud CLI)
 - **Swarm orchestration** → `swarm` skill (parallel agent work, merge protocol, worker lifecycle)
+
+---
+
+## Non-Trivial Task Detection
+
+Before starting implementation, assess whether the task warrants brainstorming:
+
+**Trigger brainstorming** (`/brainstorm` or load `brainstorming` skill):
+- Touches 3+ files or 2+ modules
+- Involves unfamiliar library, API, or pattern
+- Ambiguous or underspecified description
+- Feels like more than one session
+- User asks "how should we..." or "what's the best way to..."
+
+**Skip brainstorming** — proceed directly:
+- Single-file change with clear scope
+- Mechanical rename/refactor
+- Docs-only change
+- Bug fix with obvious root cause
+- User says "just do it" or "skip brainstorming"
+
+When in doubt, brainstorm. The cost of 2 minutes of discovery is far less than a dead-end implementation.
 
 ---
 
@@ -107,6 +130,8 @@ Skills persist for the entire session. Once loaded, they remain in context.
 - Never name things 'improved', 'new', 'enhanced' - code naming should be evergreen
 
 **Package management**: `uv` preferred over `pip` (load `uv-management` for workflows)
+
+**Pre-implementation**: `/brainstorm` for non-trivial tasks (auto-triggered, or invoke manually)
 
 **Version control**: Never push unless asked
 
