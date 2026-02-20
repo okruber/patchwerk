@@ -4,25 +4,69 @@
   <img src="assets/patchwerk.png" alt="Patchwerk" width="200"/>
 </p>
 
-Reusable agent configuration patterns for AI coding assistants.
+Distribute reusable agent configuration files across repos. A Python CLI that syncs skills, agent definitions, and tool config from a single source of truth.
+
+## What it does
+
+- `patchwerk init` — copy all bundled configs into a target repo (skips existing files)
+- `patchwerk sync` — update managed paths to latest bundled versions
+- `patchwerk diff` — dry-run preview of what sync would change
+
+**Managed paths** (synced automatically):
+- `.agent-skills/` — domain expertise modules for AI coding assistants
+- `.agent-defs/` — task agent definitions (e.g. read-only devrun)
+- `.mcp.json` — MCP server configuration
+
+## Installation
+
+```bash
+# One-off use
+uvx --from git+ssh://git@github.com/<user>/patchwerk.git patchwerk init
+
+# Shell alias for repeated use
+alias patchwerk='uvx --from git+ssh://git@github.com/<user>/patchwerk.git patchwerk'
+```
 
 ## Architecture
 
-**Multi-framework support** via symlinks: `.claude/` and `.gemini/` both point to centralized config.
-
 ```
-AGENTS.md (root)           → Project config + skill routing
-  ├→ .agent-skills/        → Domain expertise (Python, testing, GCP, etc.)
-  └→ .agent-defs/          → Task agents (devrun for pytest/ruff/etc.)
+src/patchwerk/
+├── cli.py              # CLI: init, sync, diff, stage
+└── templates/          # Symlink to repo root (bundled configs)
+
+.agent-skills/          # Skills: Python, testing, debugging, GCP, Terraform, uv, Docker, swarm
+.agent-defs/            # devrun agent (pytest/ruff/prettier — read-only)
+.claude/
+├── CLAUDE.md           # Entry point → @../AGENTS.md
+├── commands/           # Custom commands (brainstorm, setup-swarm, etc.)
+└── hooks/              # Git/session hooks
+AGENTS.md               # Routing config + coding principles
+orchestration/          # Swarm setup/teardown scripts for parallel agent work
 ```
 
-**Entry**: `.claude/CLAUDE.md` → `@../AGENTS.md`
+**`src/patchwerk/templates/` is a symlink to the repo root** — no duplication, single source of truth.
 
-**Skills load on-demand**: Python standards, testing architecture, debugging, GCP ops, Terraform, uv/Docker patterns.
+## Skills included
 
-## Key Features
+| Skill | Domain |
+|-------|--------|
+| `dignified-python` | Python standards (LBYL, ABC, modern types) |
+| `fake-driven-testing` | 5-layer testing architecture |
+| `brainstorming` | Pre-implementation discovery |
+| `uv-management` | Package management with uv |
+| `uv-docker` | Multistage Docker builds with uv |
+| `debugging-framework` | 4-phase systematic debugging |
+| `gcp-observability` | GCP operations via gcloud CLI |
+| `swarm` | Parallel agent orchestration |
+| `terraform` | IaC patterns with Checkov/docs |
+| `commit-messages` | Conventional commits |
 
-- Single-source-of-truth via symlinks
-- Stack-agnostic reusability
-- Read-only safety for test runners
-- Progressive disclosure (skills loaded when relevant)
+## Maintainer workflow
+
+```bash
+# Stage local changes into the package
+patchwerk stage
+
+# Build and publish
+uv build
+```
