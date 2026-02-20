@@ -108,6 +108,7 @@ pyrightconfig.json
 
 # Swarm
 .swarm-identity
+launch-worker.*
 
 # Ignore junction/symlink contents (Windows workaround)
 .claude/agents/

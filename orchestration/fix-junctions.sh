@@ -33,10 +33,17 @@ create_junction() {
 
   if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "mingw"* || "$OSTYPE" == "cygwin" ]]; then
     # Windows: use cmd junction (works without admin privileges)
-    local win_target win_link
-    win_target="$(cygpath -w "$target")"
-    win_link="$(cygpath -w "$link")"
-    cmd //c "mklink /J \"$win_link\" \"$win_target\"" > /dev/null
+    # Use relative paths to avoid MSYS absolute-path mangling with cmd.exe
+    local saved_dir
+    saved_dir="$(pwd)"
+    local link_parent link_name
+    link_parent="$(dirname "$link")"
+    link_name="$(basename "$link")"
+    local rel_target
+    rel_target="$(realpath --relative-to="$link_parent" "$target")"
+    cd "$link_parent"
+    cmd //c mklink //J "$link_name" "${rel_target//\//\\}" > /dev/null
+    cd "$saved_dir"
   else
     # Unix: use symbolic link
     ln -s "$target" "$link"
