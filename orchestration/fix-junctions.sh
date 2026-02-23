@@ -26,8 +26,8 @@ create_junction() {
   local target="$1"  # what to link to
   local link="$2"    # where the link goes
 
-  # Remove existing link/directory if present
-  if [[ -d "$link" ]]; then
+  # Remove existing link/directory/file if present
+  if [[ -e "$link" || -L "$link" ]]; then
     rm -rf "$link"
   fi
 
