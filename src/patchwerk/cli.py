@@ -9,7 +9,7 @@ from importlib import resources
 from pathlib import Path
 
 # Paths overwritten on sync (user may customise others)
-MANAGED_PATHS = frozenset({".agent-skills", ".agent-defs", ".mcp.json"})
+MANAGED_PATHS = frozenset({".agent-skills", ".agent-defs", ".mcp.json", "orchestration"})
 
 # Relative posix prefixes to skip during template iteration (Windows junctions)
 SKIP_PREFIXES = (".claude/agents/", ".claude/skills/")
