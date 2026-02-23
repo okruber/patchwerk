@@ -46,6 +46,29 @@ orchestration/          # Swarm setup/teardown scripts for parallel agent work
 
 **`src/patchwerk/templates/` is a symlink to the repo root** — no duplication, single source of truth.
 
+## Swarm lifecycle
+
+The swarm scripts follow a **setup once, use many times, teardown when done** pattern:
+
+1. **`bash orchestration/setup.sh`** — Run once. Creates worker worktrees, merge slot, junctions, identity files, and launcher scripts. Idempotent (safe to re-run).
+2. **`bash orchestration/launch.sh`** — Run each session. Creates detached tmux sessions (`patchwerk_conductor`, `patchwerk_worker-1`, etc.), each running Claude Code. Workers auto-run `/next` to claim work immediately.
+3. **`bash orchestration/teardown.sh`** — Run when you're done with parallel work. Kills tmux sessions and removes worker worktrees. Preserves the merge slot for future use.
+
+Requires tmux (`brew install tmux` on macOS). Sessions are named `patchwerk_*` for compatibility with [stacken-tui](https://github.com/okruber/stacken-tui).
+
+### Merging worker changes to main
+
+Workers merge their own work via `/next` (step 8), which runs `orchestration/merge-back.sh` automatically. The script:
+
+1. Acquires the merge slot (blocks if another worker is merging)
+2. Rebases the worker branch onto latest `origin/main`
+3. Fast-forward merges into main and pushes
+4. Releases the merge slot
+
+Only one worker can merge at a time — the merge slot serializes access to prevent conflicts.
+
+If the rebase fails, the script aborts cleanly, releases the slot, and asks you to resolve conflicts manually before re-running. To invoke manually from a worker worktree: `bash orchestration/merge-back.sh` (refuses to run from the main worktree).
+
 ## Skills included
 
 | Skill | Domain |
