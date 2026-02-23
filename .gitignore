@@ -30,6 +30,7 @@ service-account*.json
 
 # Personal Overrides
 .claude/CLAUDE.local.md
+.claude/settings.local.json
 *.local.md
 AGENTS.md.example
 .beads
