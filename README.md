@@ -8,14 +8,24 @@ Distribute reusable agent configuration files across repos. A Python CLI that sy
 
 ## What it does
 
-- `patchwerk init` — copy all bundled configs into a target repo (skips existing files)
-- `patchwerk sync` — update managed paths to latest bundled versions
-- `patchwerk diff` — dry-run preview of what sync would change
+Patchwerk separates **framework content** (skill routing, coding principles, session protocol) from **project-specific content** (tech stack, architecture, purpose). Framework updates propagate to all projects via `sync`; project-specific files are written once on `init` and never overwritten.
 
-**Managed paths** (synced automatically):
-- `.agent-skills/` — domain expertise modules for AI coding assistants
+| Command | Purpose |
+|---------|---------|
+| `patchwerk init` | Bootstrap a new repo with all configs (skips existing files) |
+| `patchwerk sync` | Update managed paths to latest framework versions |
+| `patchwerk diff` | Dry-run preview of what sync would change |
+| `patchwerk stage` | (Maintainer) Bundle repo files into the package for distribution |
+
+**Managed paths** (overwritten on sync):
+- `.agent-skills/` — domain expertise modules, including `framework/core.md`
 - `.agent-defs/` — task agent definitions (e.g. read-only devrun)
 - `.mcp.json` — MCP server configuration
+- `.claude/settings.json` — Claude Code project settings
+
+**Project-specific files** (written on init, never overwritten):
+- `AGENTS.md` — project overview + `@` import of framework core
+- `.claude/CLAUDE.md` — entry point, imports AGENTS.md
 
 ## Installation
 
@@ -32,19 +42,103 @@ alias patchwerk='uvx --from git+ssh://git@github.com/<user>/patchwerk.git patchw
 ```
 src/patchwerk/
 ├── cli.py              # CLI: init, sync, diff, stage
-└── templates/          # Symlink to repo root (bundled configs)
+└── templates/          # Bundled configs distributed to target repos
 
-.agent-skills/          # Skills: Python, testing, debugging, GCP, Terraform, uv, Docker, swarm
+.agent-skills/
+├── framework/
+│   └── core.md         # Framework: skill routing, principles, session protocol
+├── dignified-python/   # Skill modules (synced to all projects)
+├── fake-driven-testing/
+└── ...
 .agent-defs/            # devrun agent (pytest/ruff/prettier — read-only)
 .claude/
 ├── CLAUDE.md           # Entry point → @../AGENTS.md
 ├── commands/           # Custom commands (brainstorm, setup-swarm, etc.)
 └── hooks/              # Git/session hooks
-AGENTS.md               # Routing config + coding principles
+AGENTS.md               # Project overview → @.agent-skills/framework/core.md
 orchestration/          # Swarm setup/teardown scripts for parallel agent work
 ```
 
-**`src/patchwerk/templates/` is a symlink to the repo root** — no duplication, single source of truth.
+### Import chain
+
+Claude Code resolves `@` directives recursively (up to 5 hops):
+
+```
+.claude/CLAUDE.md  →  @../AGENTS.md  →  @.agent-skills/framework/core.md
+     (entry point)      (project-specific)      (framework, synced)
+```
+
+This means each project keeps its own `AGENTS.md` with project-specific context (purpose, tech stack, architecture), while the framework content in `core.md` stays in sync across all projects.
+
+## Workflows
+
+### New project setup
+
+```bash
+cd ~/Projects/my-new-repo
+patchwerk init
+
+# Edit AGENTS.md — fill in the project overview placeholders
+$EDITOR AGENTS.md
+```
+
+`init` copies all templates, skipping files that already exist. The skeleton `AGENTS.md` has TODO placeholders for project-specific fields.
+
+### Keeping projects up to date
+
+```bash
+# Preview what would change
+patchwerk --target ~/Projects/my-other-repo diff
+
+# Apply updates
+patchwerk --target ~/Projects/my-other-repo sync
+```
+
+`sync` overwrites managed paths (skills, agent-defs, mcp.json, settings.json) but leaves `AGENTS.md` and other project-specific files untouched. When framework principles change in patchwerk, a single `sync` delivers them everywhere.
+
+### Migrating an existing project
+
+If a project has an old monolithic `AGENTS.md` (full framework content inline):
+
+1. Run `patchwerk sync` to deliver `framework/core.md`
+2. Replace the project's `AGENTS.md` with a thin version:
+
+```markdown
+<!-- ROUTING FILE: Load skills as directed. Read before writing code. -->
+
+# Agent Configuration
+
+## Project Overview
+
+**Purpose**: Your project description here
+
+**Tech Stack**:
+- Language: Go
+- Package Management: go modules
+- Testing: go test
+- VCS: Git (feature branches, never push unless asked)
+
+**Architecture**: Brief architecture description
+
+---
+
+@.agent-skills/framework/core.md
+```
+
+### Maintainer: updating the framework
+
+```bash
+# Edit framework content in patchwerk repo
+$EDITOR .agent-skills/framework/core.md
+
+# Stage into the package for distribution
+patchwerk stage
+
+# Build and publish
+uv build
+```
+
+`stage` bundles `.agent-skills/`, `.agent-defs/`, `.claude/`, `.gemini/`, `.mcp.json`, and `orchestration/` into the package. It does **not** stage `AGENTS.md` — the template skeleton is maintained separately from patchwerk's own project-specific `AGENTS.md`.
 
 ## Swarm lifecycle
 
@@ -83,13 +177,3 @@ If the rebase fails, the script aborts cleanly, releases the slot, and asks you 
 | `swarm` | Parallel agent orchestration |
 | `terraform` | IaC patterns with Checkov/docs |
 | `commit-messages` | Conventional commits |
-
-## Maintainer workflow
-
-```bash
-# Stage local changes into the package
-patchwerk stage
-
-# Build and publish
-uv build
-```

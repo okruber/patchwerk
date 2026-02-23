@@ -21,7 +21,7 @@ SKIP_PREFIXES = (".claude/agents/", ".claude/skills/")
 CLAUDE_ALLOWLIST = frozenset({"CLAUDE.md", "commands", "docs", "hooks", "settings.json"})
 
 # Ordered list of items copied from repo root during stage
-STAGE_SOURCES = ["AGENTS.md", ".mcp.json", ".claude", ".gemini", ".agent-skills", ".agent-defs", "orchestration"]
+STAGE_SOURCES = [".mcp.json", ".claude", ".gemini", ".agent-skills", ".agent-defs", "orchestration"]
 
 
 def _is_managed(rel: Path) -> bool:
