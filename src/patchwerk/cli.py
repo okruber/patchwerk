@@ -11,20 +11,23 @@ from pathlib import Path
 # Paths overwritten on sync (user may customise others)
 MANAGED_PATHS = frozenset({".agent-skills", ".agent-defs", ".mcp.json", "orchestration"})
 
+# Individual files also managed by sync (outside MANAGED_PATHS directories)
+MANAGED_FILES = frozenset({".claude/settings.json"})
+
 # Relative posix prefixes to skip during template iteration (Windows junctions)
 SKIP_PREFIXES = (".claude/agents/", ".claude/skills/")
 
 # Allowlist for .claude/ items copied during stage (never touch junctions)
-CLAUDE_ALLOWLIST = frozenset({"CLAUDE.md", "commands", "docs", "hooks"})
+CLAUDE_ALLOWLIST = frozenset({"CLAUDE.md", "commands", "docs", "hooks", "settings.json"})
 
 # Ordered list of items copied from repo root during stage
 STAGE_SOURCES = ["AGENTS.md", ".mcp.json", ".claude", ".gemini", ".agent-skills", ".agent-defs", "orchestration"]
 
 
 def _is_managed(rel: Path) -> bool:
-    """True if rel is under a patchwerk-managed path."""
+    """True if rel is under a patchwerk-managed path or is a managed file."""
     top = rel.parts[0] if rel.parts else ""
-    return top in MANAGED_PATHS
+    return top in MANAGED_PATHS or rel.as_posix() in MANAGED_FILES
 
 
 def _iter_template_files(templates_path: Path):
