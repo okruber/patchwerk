@@ -116,3 +116,7 @@ launch-worker.*
 .claude/skills/
 .gemini/agents/
 .gemini/skills/
+# bd worktree
+worker-1/
+# bd worktree
+worker-2/
