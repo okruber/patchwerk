@@ -61,7 +61,7 @@ The merge slot ensures only one worker merges at a time, preventing conflicts:
 Worker commits changes
   |
   v
-bd merge-slot acquire --holder=<worker> --wait   # blocks if held
+BD_ACTOR=<worker> bd update <prefix>-merge-slot --claim   # atomic acquire
   |
   v
 git fetch origin main && git rebase origin/main   # get latest
@@ -76,7 +76,7 @@ git push origin <branch> --force-with-lease        # push rebased branch
 git push origin main
   |
   v
-bd merge-slot release --holder=<worker>
+BD_ACTOR=<worker> bd update <prefix>-merge-slot --status=open --assignee=""
 ```
 
 **On rebase conflict**: abort rebase, release slot, report to human.
@@ -118,8 +118,8 @@ Each `/next` cycle:
 | `bd worktree create <name> --branch <name>` | Create worker worktree |
 | `bd worktree remove <name>` | Remove worker worktree |
 | `bd merge-slot create` | Initialize merge slot |
-| `bd merge-slot acquire --holder=<id> --wait` | Lock merge slot |
-| `bd merge-slot release --holder=<id>` | Release merge slot |
+| `bd update <prefix>-merge-slot --claim` | Lock merge slot (workaround) |
+| `bd update <prefix>-merge-slot --status=open --assignee=""` | Release merge slot (workaround) |
 | `bd merge-slot check` | Check who holds the slot |
 | `bd sync` | Sync beads state with git |
 
