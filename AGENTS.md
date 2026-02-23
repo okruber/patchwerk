@@ -148,3 +148,47 @@ Skills persist for the entire session. Once loaded, they remain in context.
 - FORBIDDEN: Writing tests for speculative or "maybe later" features
 - ALLOWED: TDD workflow (write test → implement feature → refactor)
 - MUST: Only test actively implemented code
+
+<!-- BEGIN BEADS INTEGRATION -->
+## Issue Tracking → `bd` (beads)
+
+Use `bd` for ALL task tracking. No markdown TODOs, no other trackers.
+
+```bash
+bd ready                                      # find unblocked work
+bd create "Title" --description="..." -t task|bug|feature|epic|chore -p 0-4
+bd update <id> --status in_progress           # claim work
+bd close <id> --reason "Done"                 # complete work
+```
+
+**Priorities**: `0` critical → `1` high → `2` medium (default) → `3` low → `4` backlog
+
+**Discovered work**: link with `--deps discovered-from:<parent-id>`
+
+<!-- END BEADS INTEGRATION -->
+
+## Landing the Plane (Session Completion)
+
+**When ending a work session**, you MUST complete ALL steps below. Work is NOT complete until `git push` succeeds.
+
+**MANDATORY WORKFLOW:**
+
+1. **File issues for remaining work** - Create issues for anything that needs follow-up
+2. **Run quality gates** (if code changed) - Tests, linters, builds
+3. **Update issue status** - Close finished work, update in-progress items
+4. **PUSH TO REMOTE** - This is MANDATORY:
+   ```bash
+   git pull --rebase
+   bd sync
+   git push
+   git status  # MUST show "up to date with origin"
+   ```
+5. **Clean up** - Clear stashes, prune remote branches
+6. **Verify** - All changes committed AND pushed
+7. **Hand off** - Provide context for next session
+
+**CRITICAL RULES:**
+- Work is NOT complete until `git push` succeeds
+- NEVER stop before pushing - that leaves work stranded locally
+- NEVER say "ready to push when you are" - YOU must push
+- If push fails, resolve and retry until it succeeds
