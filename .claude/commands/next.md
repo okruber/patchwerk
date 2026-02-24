@@ -10,10 +10,10 @@ If you are the conductor, STOP and say: "This command is for workers only. Run /
 ## 2. Clean Slate
 
 ```bash
-git fetch origin main && git reset --hard origin/main
+git fetch origin main && git switch -C work origin/main --discard-changes
 ```
 
-This ensures you start from the latest main. Any previous branch work is abandoned.
+This ensures you start from the latest main on a fresh `work` branch. Any previous branch work is abandoned.
 
 ## 3. Find Work
 

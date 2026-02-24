@@ -90,7 +90,7 @@ BD_ACTOR=<worker> bd update <prefix>-merge-slot --status=open --assignee=""
 Each `/next` cycle:
 
 1. **Identity check** — confirm we're a worker (not conductor)
-2. **Clean slate** — `git fetch origin main && git reset --hard origin/main`
+2. **Clean slate** — `git fetch origin main && git switch -C work origin/main --discard-changes`
 3. **Claim issue** — `bd ready` → pick highest priority → `bd update <id> --status=in_progress --assignee=<worker>`
 4. **Implement** — do the work, load relevant skills as needed
 5. **Human review** — STOP and ask human to review before proceeding
